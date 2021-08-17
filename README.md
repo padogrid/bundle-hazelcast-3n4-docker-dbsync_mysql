@@ -18,11 +18,11 @@ The client applications read/write from/to Hazelcast which in turn read/write fr
 
 ![DB Sync Screenshot](images/mysql-sync.png)
 
-## Configurting Bundle Environment
+## Configuring Bundle Environment
 
 ### MySQL
 
-The 'db' cluster has been preconfigured to connect to MySQL on localhost with the user name `root` and the password `password`. If you need to change user name and password, edit `etc/hibernate.cfg-mysql.xml`.
+The `db` cluster has been preconfigured to connect to MySQL on localhost with the user name `root` and the password `password`. If you need to change user name and password, edit `etc/hibernate.cfg-mysql.xml`.
 
 ```console
 switch_cluster db
@@ -61,7 +61,7 @@ cd_docker dbsync_mysql
 docker-compose up
 ```
 
-5. The docker compose includes *Adminer*. Open it in the browser and add the **nw** database in which we will be syncronizing Hazelcast maps. When you run the `test_group` script (see below), the `customers` and `orders` tables will automatically be created by Hibernate invoked by the `MapStorePkDbImpl` plugin.
+5. The Docker Compose environment includes *Adminer*. Open it in the browser and add the **nw** database in which we will be syncronizing Hazelcast the `nw/customers` and `nw/orders` maps. When you run the `test_group` script (see below), the `customers` and `orders` tables will automatically be created in the `nw` database by Hibernate invoked by the `MapStorePkDbImpl` plugin.
 
 Adminer URL: http://localhost:8081
 
