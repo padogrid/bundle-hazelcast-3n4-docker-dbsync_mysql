@@ -13,6 +13,10 @@ buildNumber.properties
 # vi
 *.swp
 
+# Eclipse
+.project
+.settings
+
 # PadoGrid workspace
 /.addonenv.sh
 /initenv.sh
@@ -20,11 +24,14 @@ buildNumber.properties
 bundles
 lib
 plugins
+.workspace
+.cluster
+workspace.code-workspace
 
 # PadoGrid workspace directories
 apps
-clusters
-docker
+#clusters
+#docker
 k8s
 pods
 

@@ -1,97 +1,145 @@
-# Hazelcast Bundle Template
-
-This bundle serves as a template for creating a new Hazelcast onlne bundle.
+# Bundle: db
+This bundle is preconfigured to synchronize Hazelcast with MySQL running as a Docker container. It includes the `db` cluster app to read/write from/to Hazelcast and MySQL. It also includes instructions for replacing MySQL with another database.
 
 ## Installing Bundle
 
-```bash
-install_bundle -download bundle-hazelcast-template
+```console
+# Current workspace
+install_bundle -download bundle-hazelcast-3n4-docker-dbsync_mysql
+
+# New workspace
+install_bundle -checkout bundle-hazelcast-3n4-docker-dbsync_mysql
 ```
 
 ## Use Case
 
-If you are creating a new online bundle, then you can use this template to create your bundle repo. It includes all the required files with marked annotations for you to quickly start developing a new online bundle. Please follow the steps shown below.
+The client applications read/write from/to Hazelcast which in turn read/write from/to a database. The database is used as the persistent store and Hazelcast as the bidirectional cache-aside store. The Hazelcast maps are configured with the LFU eviction policy to evict entries if the free heap size falls below 25% of the maximum heap size. This ensures the Hazelcast cluster will have at least 25% of free memory at all time which is necessary for executing distributed operations such as query and task executions.
 
-## 1. Create Repo
+![DB Sync Screenshot](images/db-sync.png)
 
-Select **Use this template** button in the upper right coner to create your repo. Make sure to follow the bundle naming conventions described in the following link.
+## Configurting Bundle Environment
 
-## 2. Checkout Repo in Workspace
+### MySQL
 
-```bash
-# PadoGrid 0.9.7+
-install_bundle -checkout <bundle-repo-name>
-
-# PadoGrid 0.9.6 and older
-install_bundle -download -workspace <bundle-repo-name>
-
-# Switch into the checked out bundle workspace
-switch_workspace <bundle-repo-name>
-```
-
-## 3. Update Files
-
-Update the files came with the template repo.
-
-- `pom.xml`
-- `assembly-descriptor.xml`
-- `.gitignore`
-- `README_HEADER.md` (Optional)
-- `README.md` (This file)
-- `README.TEMPLATE` (Remove it when done. See instructions below.)
-- `required_products.txt`
-
-### 3.1. pom.xml
-
-The `pom.xml` file contains instructions annocated with **@template**. Search **@template** and add your bundle specifics there.
-
-### 3.2 assembly-descriptor.xml
-
-This file creates a tarball that will be deployed when the user executes the `install_bundle -download` command. Search **@template** and add your bundle specifics there.
-
-### 3.3 .gitignore
-
-The `.gitignore` file lists workspace specific files to be excluded from getting checked in. Edit `.gitignore` and add new exludes or remove existing excludes.
-
-```bash
-vi .gitignore
-```
-
-Make sure to comment out your workspace directories (components) so that they can be included by `git`.
+The 'db' cluster has been preconfigured to connect to MySQL on localhost with the user name `root` and the password `password`. If you need to change user name and password, edit `etc/hibernate.cfg-mysql.xml`.
 
 ```console
-...
-# PadoGrid workspace directories
-apps
-clusters
-docker
-k8s
-pods
-...
+switch_cluster db
+vi etc/hibernate.cfg-mysql.xml
 ```
 
-## 3.4. README_HEADER.md
+### Create and build `perf_test_db`
 
-Enter a short description of your bundle in the `README_HEADER.md` file. This file content is displayed when you execute the `show_bundle -header` command. **Note that this file is optional.** If it does not exist, then the first paragraph of the `README.md` file is used instead.
+We will use the `perf_test` app included in PadoGrid to ingest data into the Hazelcast cluster.
 
-## 3.5. READEME.md (this file)
+```console
+# Create perf_test with the name 'perf_test_db'
+create_app -name perf_test_db
 
-Replace `README.md` with the README_TEMPLATE.md file. Make sure to remove `README_TEMPLATE.md` after you have replaced `READEME.md` with it.
+# We need to download the MySQL binary files by building `perf_test_db` as follows.
+cd_app perf_test_db; cd bin_sh
+./build_app
+```
+
+## Startup Sequence
+
+```console
+# 1. Add at least two (2) members to the `db` cluster. All bundles come without members.
+switch_cluster db
+add_member; add_member
+
+# 2. Run the cluster.
+start_cluster
+
+# 3. Monitor the log file. Hibernate has been configured to log SQL statements
+#    executed by the MapStorePkDbImpl plugin.
+show_log
+
+# 4. Open another terminal and launch Docker Compose.
+cd_docker dbsync_mysql
+docker-compose up
+```
+
+5. The docker compose includes *Adminer*. Open it in the browser and add the **nw** database in which we will be syncronizing Hazelcast maps. When you run the `test_group` script (see below), the `customers` and `orders` tables will automatically be created by Hibernate invoked by the `MapStorePkDbImpl` plugin.
+
+Adminer URL: http://localhost:8081
+
+```console
+Username: root
+Password: password
+Database to create: nw
+```
+
+![Adminer Screenshot](images/adminer.png)
+
+6. Ingest data
+
+The `test_group` script creates mock data for `Customer` and `Order` objects and ingests them into the Hazelcast cluster which in turn writes to MySQL via the `MapStorePkDbImpl` plugin included in the PadoGrid distribution. The same plugin is also registered to retrieve data from MySQL for cache misses in the cluster.
+
+```console
+cd_app perf_test_db; cd bin_sh
+./test_group -prop ../etc/group-factory.properties -run
+```
+
+You should see SQL statements being logged if you are running `show_log`.
+
+## Replacing MySQL with Another Database
+
+If you have a database other than MySQL then you need to download the appropriate JDBC driver and update the Hibernate configuration file. The JDBC driver can be downloaded by adding the database dependency in the `pom.xml` file in the `perf_test_db` directory and run the `build_app` command as shown below.
+
+```console
+cd_app perf_test_db
+vi pom.xml
+```
+
+The following shows the PostgresSQL dependency that is already included in the `pom.xml` file.
+
+```xml
+<!-- https://mvnrepository.com/artifact/org.postgresql/postgresql -->
+<dependency>
+   <groupId>org.postgresql</groupId>
+   <artifactId>postgresql</artifactId>
+   <version>42.2.8</version>
+</dependency>
+```
+
+Build the app. The `build_app` command downloads your JDBC driver and automatically deploys it to the `$PADOGRID_WORKSPACE/lib` directory.
+
+```console
+cd bin_sh
+./build_app
+```
+
+Configure Hibernate. Copy the `etc/hibernate.cfg-mysql.xml` file in the cluster directory to a file with another name, e.g., `hibernate.cfg-mydb.xml` and include the driver and login information in the new file.
+
+```console
+cd_cluster
+cp etc/hibernate.cfg-mysql.xml etc/hibernate.cfg-mydb.xml
+vi etc/hibernate.cfg-mydb.xml
+```
+
+Set the cluster to the new Hibernate configuration file. Edit `bin_sh/setenv.sh` and set the `HIBERNATE_CONFIG_FILE` environment variable to the new Hibernate configuration file name.
+
+```console
+cd_cluster
+vi bin_sh/setenv.sh
+```
+
+For our example, you would set `HIBERNATE_CONFIG_FILE` in the `bin_sh/setenv.sh` file as follows:
 
 ```bash
-cp README_TEMPLATE.md README.md
-git rm README_TEMPLATE.md
+HIBERNATE_CONFIG_FILE="$CLUSTER_DIR/etc/hibernate.cfg-mydb.xml"
 ```
 
-Update the `READEME.md` file by following the instructions in that file.
+Go to the [`nw` Schema](#nw-schema) section and continue.
 
-## 3.6. required_products.txt
+## Teardown
 
-The `required_products.txt` file must include a list of required products and their versions. Its format is described in the following link.
+```console
+# Stop the cluster.
+stop_cluster
 
-[Relaxed Bundle Naming Conventions](https://github.com/padogrid/padogrid/wiki/User-Bundle-Repos#relaxed-conventions)
-
-## 4. Develop and Test Bundle
-
-You can freely make changes and test the bundle in the workspace. When you are ready to check in, you simply commit the changes using the `git commit` command. For new files, you will need to select only the ones that you want to check in using the `git status -u` and `git diff` commands. For those files that you do not want to check in, you can list them in the `.gitignore` file so that they do not get checked in accidentally.
-
+# Stop Docker Compose
+cd_docker dbsync_mysql
+docker-compose down
+```
