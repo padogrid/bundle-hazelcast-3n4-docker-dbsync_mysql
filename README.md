@@ -1,4 +1,5 @@
-# Bundle: db
+# Bundle: MySQL
+
 This bundle is preconfigured to synchronize Hazelcast with MySQL running as a Docker container. It includes the `db` cluster app to read/write from/to Hazelcast and MySQL. It also includes instructions for replacing MySQL with another database.
 
 ## Installing Bundle
