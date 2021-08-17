@@ -1,4 +1,4 @@
-# Bundle: MySQL
+# Bundle: MySQL Sync (Docker)
 
 This bundle is preconfigured to synchronize Hazelcast with MySQL running as a Docker container. It includes the `db` cluster app to read/write from/to Hazelcast and MySQL. It also includes instructions for replacing MySQL with another database.
 
@@ -16,7 +16,7 @@ install_bundle -checkout bundle-hazelcast-3n4-docker-dbsync_mysql
 
 The client applications read/write from/to Hazelcast which in turn read/write from/to a database. The database is used as the persistent store and Hazelcast as the bidirectional cache-aside store. The Hazelcast maps are configured with the LFU eviction policy to evict entries if the free heap size falls below 25% of the maximum heap size. This ensures the Hazelcast cluster will have at least 25% of free memory at all time which is necessary for executing distributed operations such as query and task executions.
 
-![DB Sync Screenshot](images/db-sync.png)
+![DB Sync Screenshot](images/mysql-sync.png)
 
 ## Configurting Bundle Environment
 
