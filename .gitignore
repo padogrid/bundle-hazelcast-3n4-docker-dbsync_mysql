@@ -34,6 +34,7 @@ apps
 #docker
 k8s
 pods
+run
 
 # Bundle specifics
 archive

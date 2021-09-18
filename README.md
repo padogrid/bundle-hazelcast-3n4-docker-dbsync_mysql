@@ -6,10 +6,13 @@ This bundle is preconfigured to synchronize Hazelcast with MySQL running as a Do
 
 ```console
 # Current workspace
-install_bundle -download bundle-hazelcast-3n4-docker-dbsync_mysql
+install_bundle -download bundle-hazelcast-3n4n5-docker-dbsync_mysql
 
-# New workspace
-install_bundle -checkout bundle-hazelcast-3n4-docker-dbsync_mysql
+# New workspace: download 
+install_bundle -download -workspace bundle-hazelcast-3n4n5-docker-dbsync_mysql
+
+# New workspace: checkout
+install_bundle -checkout bundle-hazelcast-3n4n5-docker-dbsync_mysql
 ```
 
 ## Use Case
@@ -84,6 +87,36 @@ cd_app perf_test_db; cd bin_sh
 
 You should see SQL statements being logged if you are running `show_log`.
 
+7. Management Center
+
+You can use the Management Center to view the ingested data.
+
+```bash
+start_mc
+```
+
+URL: http://localhost:8080/hazelcast-mancenter
+
+Using the SQL Browser, execute the following queries.
+
+```sql
+select * from "nw/customers";
+select * from "nw/orders";
+```
+
+![Management Center Query Browser](images/mancenter-sql.png)
+
+8. Adminer
+
+From Adminer, execute the following queries.
+
+```sql
+select * from customers;
+select * from orders;
+```
+
+![Adminer Query](images/adminer-sql.png)
+
 ## Replacing MySQL with Another Database
 
 If you have a database other than MySQL then you need to download the appropriate JDBC driver and update the Hibernate configuration file. The JDBC driver can be downloaded by adding the database dependency in the `pom.xml` file in the `perf_test_db` directory and run the `build_app` command as shown below.
@@ -131,8 +164,6 @@ For our example, you would set `HIBERNATE_CONFIG_FILE` in the `bin_sh/setenv.sh`
 ```bash
 HIBERNATE_CONFIG_FILE="$CLUSTER_DIR/etc/hibernate.cfg-mydb.xml"
 ```
-
-Go to the [`nw` Schema](#nw-schema) section and continue.
 
 ## Teardown
 
