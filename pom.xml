@@ -7,7 +7,7 @@
 
 	<groupId>padogrid.addon</groupId>
 	<!-- @template: Enter your bundle name here -->
-	<artifactId>bundle-hazelcast-3n4-docker-dbsync_mysql</artifactId>
+	<artifactId>bundle-hazelcast-3n4n5-docker-dbsync_mysql</artifactId>
 	<packaging>pom</packaging>
         <name>${project.artifactId}</name>
 	<version>1.0.0</version>
