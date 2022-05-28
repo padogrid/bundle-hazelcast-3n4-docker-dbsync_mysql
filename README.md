@@ -37,7 +37,7 @@ docker
 
 The `db` cluster has been preconfigured to connect to MySQL on localhost with the user name `root` and the password `password`. If you need to change user name and password, edit `etc/hibernate.cfg-mysql.xml`.
 
-```console
+```bash
 switch_cluster db
 vi etc/hibernate.cfg-mysql.xml
 ```
