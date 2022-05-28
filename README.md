@@ -4,7 +4,7 @@ This bundle is preconfigured to synchronize Hazelcast with MySQL running as a Do
 
 ## Installing Bundle
 
-```console
+```bash
 # Current workspace
 install_bundle -download bundle-hazelcast-3n4n5-docker-dbsync_mysql
 
@@ -46,7 +46,7 @@ vi etc/hibernate.cfg-mysql.xml
 
 We will use the `perf_test` app included in PadoGrid to ingest data into the Hazelcast cluster.
 
-```console
+```bash
 # Create perf_test with the name 'perf_test_db'
 create_app -name perf_test_db
 
@@ -57,7 +57,7 @@ cd_app perf_test_db; cd bin_sh
 
 ## Startup Sequence
 
-```console
+```bash
 # 1. Add at least two (2) members to the `db` cluster. All bundles come without members.
 switch_cluster db
 add_member; add_member
@@ -90,7 +90,7 @@ Database to create: nw
 
 The `test_group` script creates mock data for `Customer` and `Order` objects and ingests them into the Hazelcast cluster which in turn writes to MySQL via the `MapStorePkDbImpl` plugin included in the PadoGrid distribution. The same plugin is also registered to retrieve data from MySQL for cache misses in the cluster.
 
-```console
+```bash
 cd_app perf_test_db; cd bin_sh
 ./test_group -prop ../etc/group-factory.properties -run
 ```
@@ -131,7 +131,7 @@ select * from orders;
 
 If you have a database other than MySQL then you need to download the appropriate JDBC driver and update the Hibernate configuration file. The JDBC driver can be downloaded by adding the database dependency in the `pom.xml` file in the `perf_test_db` directory and run the `build_app` command as shown below.
 
-```console
+```bash
 cd_app perf_test_db
 vi pom.xml
 ```
@@ -149,14 +149,14 @@ The following shows the PostgresSQL dependency that is already included in the `
 
 Build the app. The `build_app` command downloads your JDBC driver and automatically deploys it to the `$PADOGRID_WORKSPACE/lib` directory.
 
-```console
+```bash
 cd bin_sh
 ./build_app
 ```
 
 Configure Hibernate. Copy the `etc/hibernate.cfg-mysql.xml` file in the cluster directory to a file with another name, e.g., `hibernate.cfg-mydb.xml` and include the driver and login information in the new file.
 
-```console
+```bash
 cd_cluster
 cp etc/hibernate.cfg-mysql.xml etc/hibernate.cfg-mydb.xml
 vi etc/hibernate.cfg-mydb.xml
@@ -164,7 +164,7 @@ vi etc/hibernate.cfg-mydb.xml
 
 Set the cluster to the new Hibernate configuration file. Edit `bin_sh/setenv.sh` and set the `HIBERNATE_CONFIG_FILE` environment variable to the new Hibernate configuration file name.
 
-```console
+```bash
 cd_cluster
 vi bin_sh/setenv.sh
 ```
@@ -177,7 +177,7 @@ HIBERNATE_CONFIG_FILE="$CLUSTER_DIR/etc/hibernate.cfg-mydb.xml"
 
 ## Teardown
 
-```console
+```bash
 # Stop the cluster.
 stop_cluster
 
