@@ -21,6 +21,16 @@ The client applications read/write from/to Hazelcast which in turn read/write fr
 
 ![DB Sync Screenshot](images/mysql-sync.png)
 
+## Bundle Contents
+
+```console
+clusters
+└── db
+
+docker
+└── dbsync_mysql
+```
+
 ## Configuring Bundle Environment
 
 ### MySQL
