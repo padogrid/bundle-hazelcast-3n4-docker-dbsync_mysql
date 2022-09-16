@@ -73,7 +73,7 @@ start_cluster
 #    executed by the MapStorePkDbImpl plugin.
 show_log
 
-# 4. Open another terminal and launch Docker Compose.
+# 4. Open another terminal and launch Docker Compose in background.
 cd_docker dbsync_mysql
 docker-compose up -d
 ```
@@ -182,8 +182,8 @@ HIBERNATE_CONFIG_FILE="$CLUSTER_DIR/etc/hibernate.cfg-mydb.xml"
 ## Teardown
 
 ```bash
-# Stop the cluster.
-stop_cluster
+# Stop the cluster and management center
+stop_cluster -all
 
 # Stop Docker Compose
 cd_docker dbsync_mysql
