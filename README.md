@@ -75,7 +75,7 @@ show_log
 
 # 4. Open another terminal and launch Docker Compose.
 cd_docker dbsync_mysql
-docker-compose up
+docker-compose up -d
 ```
 
 5. The Docker Compose environment includes *Adminer*. Open it in the browser and add the **nw** database in which we will be syncronizing Hazelcast the `nw/customers` and `nw/orders` maps. When you run the `test_group` script (see below), the `customers` and `orders` tables will automatically be created in the `nw` database by Hibernate invoked by the `MapStorePkDbImpl` plugin.
