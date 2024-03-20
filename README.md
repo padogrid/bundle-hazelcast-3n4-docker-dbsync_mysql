@@ -3,7 +3,7 @@
 ---
 
 <!-- Platforms -->
-[![Host OS](https://github.com/padogrid/padogrid/wiki/images/padogrid-host-os.drawio.svg)](https://github.com/padogrid/padogrid/wiki/Platform-Host-OS)
+[![PadoGrid 1.x](https://github.com/padogrid/padogrid/wiki/images/padogrid-padogrid-1.x.drawio.svg)](https://github.com/padogrid/padogrid/wiki/Platform-PadoGrid-1.x) [![Host OS](https://github.com/padogrid/padogrid/wiki/images/padogrid-host-os.drawio.svg)](https://github.com/padogrid/padogrid/wiki/Platform-Host-OS) [![Docker](https://github.com/padogrid/padogrid/wiki/images/padogrid-docker.drawio.svg)](https://github.com/padogrid/padogrid/wiki/Platform-Docker) 
 
 # Bundle: MySQL Sync
 
@@ -18,7 +18,7 @@ install_bundle -download bundle-hazelcast-3n4n5-docker-dbsync_mysql
 # New workspace: download 
 install_bundle -download -workspace bundle-hazelcast-3n4n5-docker-dbsync_mysql
 
-# New workspace: checkout
+# New workspace: checkout (with Git intact)
 install_bundle -checkout bundle-hazelcast-3n4n5-docker-dbsync_mysql
 ```
 
@@ -27,6 +27,12 @@ install_bundle -checkout bundle-hazelcast-3n4n5-docker-dbsync_mysql
 The client applications read/write from/to Hazelcast which in turn read/write from/to a database. The database is used as the persistent store and Hazelcast as the bidirectional cache-aside store. The Hazelcast maps are configured with the LFU eviction policy to evict entries if the free heap size falls below 25% of the maximum heap size. This ensures the Hazelcast cluster will have at least 25% of free memory at all time which is necessary for executing distributed operations such as query and task executions.
 
 ![DB Sync Screenshot](images/mysql-sync.png)
+
+## Required Software
+
+- JDK 11+ (For running Hazelcast Management Center)
+- Hazelcast 3.x, 4.x, or 5.x
+- Docker
 
 ## Bundle Contents
 
@@ -55,10 +61,10 @@ We will use the `perf_test` app included in PadoGrid to ingest data into the Haz
 
 ```bash
 # Create perf_test with the name 'perf_test_db'
-create_app -name perf_test_db
+create_app -product hazelcast -name perf_test_db
 
 # We need to download the MySQL binary files by building `perf_test_db` as follows.
-cd_app perf_test_db; cd bin_sh
+cd_app perf_test_db/bin_sh
 ./build_app
 ```
 
@@ -67,7 +73,7 @@ cd_app perf_test_db; cd bin_sh
 ```bash
 # 1. Add at least two (2) members to the `db` cluster. All bundles come without members.
 switch_cluster db
-add_member; add_member
+add_member -count 2
 
 # 2. Run the cluster.
 start_cluster
@@ -78,7 +84,7 @@ show_log
 
 # 4. Open another terminal and launch Docker Compose in background.
 cd_docker dbsync_mysql
-docker-compose up -d
+docker compose up -d
 ```
 
 5. The Docker Compose environment includes *Adminer*. Open it in the browser and add the **nw** database in which we will be syncronizing Hazelcast the `nw/customers` and `nw/orders` maps. When you run the `test_group` script (see below), the `customers` and `orders` tables will automatically be created in the `nw` database by Hibernate invoked by the `MapStorePkDbImpl` plugin.
@@ -98,7 +104,7 @@ Database to create: nw
 The `test_group` script creates mock data for `Customer` and `Order` objects and ingests them into the Hazelcast cluster which in turn writes to MySQL via the `MapStorePkDbImpl` plugin included in the PadoGrid distribution. The same plugin is also registered to retrieve data from MySQL for cache misses in the cluster.
 
 ```bash
-cd_app perf_test_db; cd bin_sh
+cd_app perf_test_db/bin_sh
 ./test_group -prop ../etc/group-factory.properties -run
 ```
 
@@ -190,7 +196,7 @@ stop_cluster -all
 
 # Stop Docker Compose
 cd_docker dbsync_mysql
-docker-compose down
+docker compose down
 ```
 
 ---

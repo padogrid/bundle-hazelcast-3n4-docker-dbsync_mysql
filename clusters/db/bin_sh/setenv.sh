@@ -1,10 +1,11 @@
+#
 # Add cluster specific environment variables in this file.
 #
 
 #
 # Set Java options, i.e., -Dproperty=xyz
 #
-#JAVA_OPTS=
+JAVA_OPTS="$JAVA_OPTS -Dhazelcast-addon.hibernate.config=$CLUSTER_DIR/etc/hibernate.cfg-mysql.xml"
 
 #
 # To use Hibernate backed MapStorePkDbImpl, set the following property and
@@ -16,8 +17,9 @@
 # directory. CLASSPATH includes all the jar files in that directory for
 # the apps and clusters running in this workspace.
 #
-#JAVA_OPTS="$JAVA_OPTS -Dpadogrid.hibernate.config=$CLUSTER_DIR/etc/hibernate.cfg-mysql.xml"
-#JAVA_OPTS="$JAVA_OPTS -Dpadogrid.hibernate.config=$CLUSTER_DIR/etc/hibernate.cfg-postgresql.xml"
+#JAVA_OPTS="$JAVA_OPTS -Dhazelcast-addon.hibernate.config=$CLUSTER_DIR/etc/hibernate.cfg-mysql.xml"
+#JAVA_OPTS="$JAVA_OPTS -Dhazelcast-addon.hibernate.config=$CLUSTER_DIR/etc/hibernate.cfg-postgresql.xml"
+#JAVA_OPTS="$JAVA_OPTS -Dhazelcast-addon.hibernate.config=$CLUSTER_DIR/etc/hibernate.cfg-derby.xml"
 
 #
 # Set Management Center Java options, i.e., -Dhazelcast.mc.forceLogoutOnMultipleLogin=true
@@ -33,6 +35,7 @@
 #    CLASSPATH - Class path set by padogrid. You can include additional libary paths.
 #                You should, however, place your library files in the plugins directories
 #                if possible.
+#    CONFIG_FILE - Config file path. You can override the config file path.
 #
 # Run Script Example:
 #    "$JAVA" $JAVA_OPTS com.newco.MyMember &
@@ -41,8 +44,6 @@
 #
 #RUN_SCRIPT=$CLUSTER_DIR/bin_sh/your-script
 
-# Set JAVA_OPTS in setenv.sh
-JAVA_OPTS="$JAVA_OPTS -Dhazelcast-addon.hibernate.config=$CLUSTER_DIR/etc/hibernate.cfg-mysql.xml"
 
 # Select the correct Hazelcast version
 CONFIG_FILE=$ETC_DIR/v$HAZELCAST_MAJOR_VERSION_NUMBER/hazelcast.xml
